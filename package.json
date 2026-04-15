@@ -1,0 +1,32 @@
+{
+  "name": "cs521-14b",
+  "version": "1.0.0",
+  "description": "Implement a simplified bridge between two local test chains that locks tokens on one chain and mints wrapped tokens on the other, using a relayer to pass attestations.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "node:chainA": "npx hardhat node --port 8545",
+    "node:chainB": "npx hardhat node --port 8546",
+    "deploy:chainA": "npx hardhat run chains/chainA.js --network chainA",
+    "deploy:chainB": "npx hardhat run chains/chainB.js --network chainB",
+    "relayer": "node relayer/relayer.js",
+    "demo": "node chains/demo.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "chai": "^6.2.2",
+    "dotenv": "^17.4.2",
+    "ethers": "^5.8.0",
+    "hardhat": "^2.22.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.6.1"
+  }
+}
