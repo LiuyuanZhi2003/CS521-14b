@@ -1,18 +1,32 @@
-const { spawn } = require("child_process");
-const path = require("path");
+require("dotenv").config();
+const { ethers } = require("hardhat");
 
-console.log("Starting Chain B on port 8546...");
+async function main() {
+  const [deployer, relayer] = await ethers.getSigners();
+  console.log("Deploying Chain B contracts with:", deployer.address);
+  console.log("Relayer address:", relayer.address);
 
-const node = spawn(
-  "npx",
-  ["hardhat", "node", "--port", "8546"],
-  {
-    cwd: path.resolve(__dirname, ".."),
-    stdio: "inherit",
-    shell: true,
-  }
-);
+  const WrappedToken = await ethers.getContractFactory("WrappedToken");
+  const wrappedToken = await WrappedToken.deploy(relayer.address);
+  await wrappedToken.deployed();
+  console.log("WrappedToken deployed to:", wrappedToken.address);
 
-node.on("close", (code) => {
-  console.log(`Chain B exited with code ${code}`);
+  const MintBridge = await ethers.getContractFactory("MintBridge");
+  const mintBridge = await MintBridge.deploy(wrappedToken.address, relayer.address);
+  await mintBridge.deployed();
+  console.log("MintBridge deployed to:", mintBridge.address);
+
+  // Update WrappedToken's relayer to MintBridge so only MintBridge can call mint
+  const tx = await wrappedToken.setRelayer(mintBridge.address);
+  await tx.wait();
+  console.log("WrappedToken relayer updated to MintBridge");
+
+  console.log("\n--- Add to .env ---");
+  console.log(`WRAPPEDTOKEN_ADDRESS=${wrappedToken.address}`);
+  console.log(`MINTBRIDGE_ADDRESS=${mintBridge.address}`);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
 });

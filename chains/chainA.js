@@ -1,18 +1,27 @@
-const { spawn } = require("child_process");
-const path = require("path");
+require("dotenv").config();
+const { ethers } = require("hardhat");
 
-console.log("Starting Chain A on port 8545...");
+async function main() {
+  const [deployer] = await ethers.getSigners();
+  console.log("Deploying Chain A contracts with:", deployer.address);
 
-const node = spawn(
-  "npx",
-  ["hardhat", "node", "--port", "8545"],
-  {
-    cwd: path.resolve(__dirname, ".."),
-    stdio: "inherit",
-    shell: true,
-  }
-);
+  const initialSupply = ethers.utils.parseEther("1000000");
+  const SourceToken = await ethers.getContractFactory("SourceToken");
+  const sourceToken = await SourceToken.deploy(initialSupply);
+  await sourceToken.deployed();
+  console.log("SourceToken deployed to:", sourceToken.address);
 
-node.on("close", (code) => {
-  console.log(`Chain A exited with code ${code}`);
+  const LockBox = await ethers.getContractFactory("LockBox");
+  const lockBox = await LockBox.deploy(sourceToken.address);
+  await lockBox.deployed();
+  console.log("LockBox deployed to:", lockBox.address);
+
+  console.log("\n--- Add to .env ---");
+  console.log(`SOURCETOKEN_ADDRESS=${sourceToken.address}`);
+  console.log(`LOCKBOX_ADDRESS=${lockBox.address}`);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
 });
