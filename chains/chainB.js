@@ -16,10 +16,7 @@ async function main() {
   await mintBridge.deployed();
   console.log("MintBridge deployed to:", mintBridge.address);
 
-  // Update WrappedToken's relayer to MintBridge so only MintBridge can call mint
-  const tx = await wrappedToken.setRelayer(mintBridge.address);
-  await tx.wait();
-  console.log("WrappedToken relayer updated to MintBridge");
+  // WrappedToken verifies signature against relayer wallet address — no setRelayer needed
 
   console.log("\n--- Add to .env ---");
   console.log(`WRAPPEDTOKEN_ADDRESS=${wrappedToken.address}`);

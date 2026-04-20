@@ -7,6 +7,7 @@ contract WrappedToken {
     uint8 public decimals = 18;
 
     address public relayer;
+    address public owner;
     mapping(address => uint256) public balanceOf;
     mapping(uint256 => bool) public processedNonces;
 
@@ -15,6 +16,12 @@ contract WrappedToken {
     event Burned(address indexed from, uint256 amount);
 
     constructor(address _relayer) {
+        relayer = _relayer;
+        owner = msg.sender;
+    }
+
+    function setRelayer(address _relayer) external {
+        require(msg.sender == owner, "Only owner");
         relayer = _relayer;
     }
 
